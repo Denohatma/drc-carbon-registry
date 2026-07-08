@@ -1,0 +1,826 @@
+// ============================================================================
+// DRC Carbon Registry Platform - Prisma Schema
+// 6 Integrated Layers: Carbon Registry, Satellite MRV, NDC Tracking,
+// Natural Capital Finance, Equity BCDC Payment Rails, Integrity Scoring
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+// --- Layer 1: Carbon Registry ---
+
+enum UserRole {
+  ROOT
+  ADMIN
+  MANAGER
+  VIEW_ONLY
+}
+
+enum CompanyRole {
+  DNA
+  PROJECT_DEVELOPER
+  CERTIFIER
+  CLIMATE_FUND
+}
+
+enum UserState {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum OrganisationState {
+  ACTIVE
+  SUSPENDED
+  PENDING
+  REJECTED
+}
+
+enum OrganisationType {
+  GOVERNMENT
+  PRIVATE
+  NGO
+  MULTILATERAL
+  ACADEMIC
+}
+
+enum ProgrammeStatus {
+  PENDING
+  AUTHORISED
+  APPROVED
+  REJECTED
+}
+
+enum CreditBlockStatus {
+  ACTIVE
+  TRANSFERRED
+  RETIRED
+  FROZEN
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum RetirementType {
+  CROSS_BORDER
+  LEGAL_ACTION
+  OTHER
+}
+
+enum RetirementStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DocumentType {
+  DESIGN_DOCUMENT
+  VALIDATION_REPORT
+  VERIFICATION_REPORT
+  MONITORING_REPORT
+  ENVIRONMENTAL_IMPACT
+  STAKEHOLDER_CONSULTATION
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// --- Layer 2: Satellite MRV ---
+
+enum MrvProjectStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  COMPLETED
+}
+
+enum SatelliteSource {
+  SENTINEL2
+  LANDSAT8
+  LANDSAT9
+}
+
+enum MonitoringFrequency {
+  MONTHLY
+  QUARTERLY
+  BIANNUAL
+  ANNUAL
+}
+
+enum AlertConfidence {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// --- Layer 3: NDC Tracking ---
+
+enum NdcTargetType {
+  MITIGATION
+  ADAPTATION
+  CROSS_CUTTING
+}
+
+enum NdcTargetStatus {
+  ON_TRACK
+  AT_RISK
+  OFF_TRACK
+}
+
+enum EmissionSector {
+  ENERGY
+  TRANSPORT
+  INDUSTRY
+  AGRICULTURE
+  FORESTRY
+  WASTE
+  OTHER
+}
+
+enum EmissionState {
+  DRAFT
+  FINALIZED
+}
+
+enum NdcActionStatus {
+  PLANNED
+  ADOPTED
+  IMPLEMENTED
+}
+
+// --- Layer 4: Natural Capital Finance ---
+
+enum CarbonProjectType {
+  REDD_PLUS
+  ARR
+  IFM
+  COOKSTOVE
+  RENEWABLE
+}
+
+enum CarbonAssetStatus {
+  IDENTIFIED
+  ASSESSED
+  SCORED
+  LISTED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// --- Layer 5: Equity BCDC Payment Rails ---
+
+enum EscrowStatus {
+  CREATED
+  FUNDED
+  RELEASED
+  DISPUTED
+  REFUNDED
+}
+
+enum PaymentType {
+  DEPOSIT
+  RELEASE
+  REFUND
+  COMMUNITY_PAYOUT
+  DEVELOPER_DISBURSEMENT
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CASH
+}
+
+enum BenefitShareStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum KycVerificationType {
+  IDENTITY
+  ADDRESS
+  BUSINESS
+  AML_SCREENING
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+// --- Layer 6: Integrity Scoring ---
+
+enum IntegrityGrade {
+  A
+  B
+  C
+  D
+  F
+}
+
+// ============================================================================
+// LAYER 1: CARBON REGISTRY
+// ============================================================================
+
+model User {
+  id             String      @id @default(cuid())
+  email          String      @unique
+  password       String
+  name           String
+  role           UserRole    @default(VIEW_ONLY)
+  companyRole    CompanyRole?
+  organisationId String?
+  state          UserState   @default(PENDING)
+  apiKey         String?     @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  organisation        Organisation?        @relation(fields: [organisationId], references: [id])
+  auditLogs           AuditLog[]
+  uploadedDocuments   Document[]           @relation("UploadedDocuments")
+  requestedTransfers  CreditTransfer[]     @relation("RequestedTransfers")
+  approvedTransfers   CreditTransfer[]     @relation("ApprovedTransfers")
+  requestedRetirements CreditRetirement[]  @relation("RequestedRetirements")
+  verifiedAlerts      DeforestationAlert[] @relation("VerifiedAlerts")
+  createdEmissions    EmissionRecord[]     @relation("CreatedEmissions")
+  assessedIntegrity   IntegrityAssessment[] @relation("AssessedIntegrity")
+  verifiedBenefits    BenefitShare[]       @relation("VerifiedBenefits")
+  verifiedKyc         KycRecord[]          @relation("VerifiedKyc")
+
+  @@index([organisationId])
+  @@index([email])
+  @@index([role])
+  @@index([state])
+  @@map("users")
+}
+
+model Organisation {
+  id        String            @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  website   String?
+  logo      String?
+  country   String?
+  type      OrganisationType?
+  state     OrganisationState @default(PENDING)
+  createdAt DateTime          @default(now())
+
+  users              User[]
+  programmes         Programme[]
+  ownedCredits       CreditBlock[]      @relation("OwnedCredits")
+  outgoingTransfers  CreditTransfer[]   @relation("OutgoingTransfers")
+  incomingTransfers  CreditTransfer[]   @relation("IncomingTransfers")
+  buyerEscrows       EscrowAccount[]    @relation("BuyerEscrows")
+  sellerEscrows      EscrowAccount[]    @relation("SellerEscrows")
+  kycRecords         KycRecord[]
+
+  @@index([state])
+  @@index([country])
+  @@map("organisations")
+}
+
+model Programme {
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  sector         String?
+  status         ProgrammeStatus @default(PENDING)
+  startYear      Int?
+  endYear        Int?
+  creditEstimate Float?
+  serialNo       String?         @unique
+  companyId      String?
+  createdAt      DateTime        @default(now())
+
+  company          Organisation?     @relation(fields: [companyId], references: [id])
+  creditBlocks     CreditBlock[]
+  creditTransfers  CreditTransfer[]
+  creditRetirements CreditRetirement[]
+  documents        Document[]
+  escrowAccounts   EscrowAccount[]
+  benefitShares    BenefitShare[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([sector])
+  @@map("programmes")
+}
+
+model CreditBlock {
+  id           String            @id @default(cuid())
+  programmeId  String
+  serialNumber String            @unique
+  startBlock   Int
+  endBlock     Int
+  creditCount  Float
+  status       CreditBlockStatus @default(ACTIVE)
+  ownerId      String?
+  createdAt    DateTime          @default(now())
+
+  programme Programme    @relation(fields: [programmeId], references: [id])
+  owner     Organisation? @relation("OwnedCredits", fields: [ownerId], references: [id])
+
+  @@index([programmeId])
+  @@index([ownerId])
+  @@index([status])
+  @@map("credit_blocks")
+}
+
+model CreditTransfer {
+  id            String         @id @default(cuid())
+  fromCompanyId String
+  toCompanyId   String
+  programmeId   String
+  creditAmount  Float
+  status        TransferStatus @default(PENDING)
+  requestedById String
+  approvedById  String?
+  createdAt     DateTime       @default(now())
+
+  fromCompany Organisation @relation("OutgoingTransfers", fields: [fromCompanyId], references: [id])
+  toCompany   Organisation @relation("IncomingTransfers", fields: [toCompanyId], references: [id])
+  programme   Programme    @relation(fields: [programmeId], references: [id])
+  requestedBy User         @relation("RequestedTransfers", fields: [requestedById], references: [id])
+  approvedBy  User?        @relation("ApprovedTransfers", fields: [approvedById], references: [id])
+
+  @@index([fromCompanyId])
+  @@index([toCompanyId])
+  @@index([programmeId])
+  @@index([status])
+  @@map("credit_transfers")
+}
+
+model CreditRetirement {
+  id            String           @id @default(cuid())
+  programmeId   String
+  creditAmount  Float
+  type          RetirementType
+  toCountry     String?
+  toCountryName String?
+  purpose       String?
+  requestedById String
+  status        RetirementStatus @default(PENDING)
+  createdAt     DateTime         @default(now())
+
+  programme   Programme @relation(fields: [programmeId], references: [id])
+  requestedBy User      @relation("RequestedRetirements", fields: [requestedById], references: [id])
+
+  @@index([programmeId])
+  @@index([status])
+  @@map("credit_retirements")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  entityType String
+  entityId   String
+  data       Json?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  title        String
+  type         DocumentType
+  url          String
+  status       DocumentStatus @default(PENDING)
+  programmeId  String?
+  uploadedById String
+  createdAt    DateTime       @default(now())
+
+  programme  Programme? @relation(fields: [programmeId], references: [id])
+  uploadedBy User       @relation("UploadedDocuments", fields: [uploadedById], references: [id])
+
+  @@index([programmeId])
+  @@index([uploadedById])
+  @@index([status])
+  @@map("documents")
+}
+
+// ============================================================================
+// LAYER 2: SATELLITE MRV
+// ============================================================================
+
+model MrvProject {
+  id                   String              @id @default(cuid())
+  name                 String
+  geography            String?
+  bounds               Json?
+  areaHectares         Float?
+  forestType           String?
+  baselineYear         Int?
+  monitoringFrequency  MonitoringFrequency @default(QUARTERLY)
+  status               MrvProjectStatus    @default(DRAFT)
+  createdAt            DateTime            @default(now())
+
+  satelliteObservations SatelliteObservation[]
+  deforestationAlerts   DeforestationAlert[]
+  carbonStocks          CarbonStock[]
+
+  @@index([status])
+  @@map("mrv_projects")
+}
+
+model SatelliteObservation {
+  id                    String          @id @default(cuid())
+  mrvProjectId          String
+  observationDate       DateTime
+  satellite             SatelliteSource
+  cloudCoverPercent     Float?
+  ndviMean              Float?
+  forestCoverPercent    Float?
+  deforestationHectares Float?
+  fireAlerts            Int?
+  biomassEstimate       Float?
+  confidenceScore       Float?
+  rawDataUrl            String?
+  processedDataUrl      String?
+  createdAt             DateTime        @default(now())
+
+  mrvProject MrvProject @relation(fields: [mrvProjectId], references: [id])
+
+  @@index([mrvProjectId])
+  @@index([observationDate])
+  @@index([satellite])
+  @@map("satellite_observations")
+}
+
+model DeforestationAlert {
+  id           String          @id @default(cuid())
+  mrvProjectId String
+  alertDate    DateTime
+  latitude     Float
+  longitude    Float
+  areaHectares Float?
+  confidence   AlertConfidence
+  source       String?
+  verified     Boolean         @default(false)
+  verifiedById String?
+  createdAt    DateTime        @default(now())
+
+  mrvProject MrvProject @relation(fields: [mrvProjectId], references: [id])
+  verifiedBy User?      @relation("VerifiedAlerts", fields: [verifiedById], references: [id])
+
+  @@index([mrvProjectId])
+  @@index([alertDate])
+  @@index([confidence])
+  @@map("deforestation_alerts")
+}
+
+model CarbonStock {
+  id                 String   @id @default(cuid())
+  mrvProjectId       String
+  assessmentDate     DateTime
+  aboveGroundBiomass Float?
+  belowGroundBiomass Float?
+  deadwood           Float?
+  litter             Float?
+  soilCarbon         Float?
+  totalCarbon        Float?
+  unit               String?
+  methodology        String?
+  createdAt          DateTime @default(now())
+
+  mrvProject MrvProject @relation(fields: [mrvProjectId], references: [id])
+
+  @@index([mrvProjectId])
+  @@index([assessmentDate])
+  @@map("carbon_stocks")
+}
+
+// ============================================================================
+// LAYER 3: NDC TRACKING
+// ============================================================================
+
+model NdcTarget {
+  id                String          @id @default(cuid())
+  sector            String
+  targetType        NdcTargetType
+  description       String?
+  baseYear          Int?
+  targetYear        Int?
+  baselineEmissions Float?
+  targetEmissions   Float?
+  reductionPercent  Float?
+  status            NdcTargetStatus @default(ON_TRACK)
+  createdAt         DateTime        @default(now())
+
+  progress NdcProgress[]
+
+  @@index([sector])
+  @@index([targetType])
+  @@index([status])
+  @@map("ndc_targets")
+}
+
+model EmissionRecord {
+  id          String        @id @default(cuid())
+  year        Int
+  sector      EmissionSector
+  subSector   String?
+  co2         Float?
+  ch4         Float?
+  n2o         Float?
+  hfcs        Float?
+  totalCo2e   Float?
+  unit        String?
+  state       EmissionState @default(DRAFT)
+  createdById String
+  createdAt   DateTime      @default(now())
+
+  createdBy User @relation("CreatedEmissions", fields: [createdById], references: [id])
+
+  @@index([year])
+  @@index([sector])
+  @@index([state])
+  @@index([createdById])
+  @@map("emission_records")
+}
+
+model NdcAction {
+  id                String          @id @default(cuid())
+  title             String
+  description       String?
+  sector            String?
+  actionType        String?
+  instrumentType    String?
+  status            NdcActionStatus @default(PLANNED)
+  startYear         Int?
+  endYear           Int?
+  expectedReduction Float?
+  achievedReduction Float?
+  createdAt         DateTime        @default(now())
+
+  @@index([sector])
+  @@index([status])
+  @@map("ndc_actions")
+}
+
+model NdcProgress {
+  id               String   @id @default(cuid())
+  ndcTargetId      String
+  reportingYear    Int
+  currentEmissions Float?
+  progressPercent  Float?
+  notes            String?
+  createdAt        DateTime @default(now())
+
+  ndcTarget NdcTarget @relation(fields: [ndcTargetId], references: [id])
+
+  @@index([ndcTargetId])
+  @@index([reportingYear])
+  @@map("ndc_progress")
+}
+
+// ============================================================================
+// LAYER 4: NATURAL CAPITAL FINANCE
+// ============================================================================
+
+model CarbonAsset {
+  id                 String            @id @default(cuid())
+  name               String
+  projectType        CarbonProjectType
+  location           String?
+  province           String?
+  area               Float?
+  estimatedCredits   Float?
+  vintageStart       Int?
+  vintageEnd         Int?
+  integrityScore     Float?
+  financeabilityScore Float?
+  riskFlags          Json?
+  status             CarbonAssetStatus @default(IDENTIFIED)
+  createdAt          DateTime          @default(now())
+
+  valuations            AssetValuation[]
+  riskAssessments       RiskAssessment[]
+  climateRisks          ClimateRisk[]
+  integrityAssessments  IntegrityAssessment[]
+
+  @@index([projectType])
+  @@index([status])
+  @@index([province])
+  @@map("carbon_assets")
+}
+
+model AssetValuation {
+  id             String   @id @default(cuid())
+  carbonAssetId  String
+  valuationDate  DateTime
+  pricePerCredit Float?
+  totalValue     Float?
+  methodology    String?
+  discountRate   Float?
+  npv            Float?
+  irr            Float?
+  paybackYears   Float?
+  createdAt      DateTime @default(now())
+
+  carbonAsset CarbonAsset @relation(fields: [carbonAssetId], references: [id])
+
+  @@index([carbonAssetId])
+  @@index([valuationDate])
+  @@map("asset_valuations")
+}
+
+model RiskAssessment {
+  id                    String    @id @default(cuid())
+  carbonAssetId         String
+  assessmentDate        DateTime
+  permanenceRisk        Float?
+  additionalityRisk     Float?
+  leakageRisk           Float?
+  overallRisk           RiskLevel
+  landRightsStatus      String?
+  communityConsentStatus String?
+  doubleCountingRisk    Float?
+  notes                 String?
+  createdAt             DateTime  @default(now())
+
+  carbonAsset CarbonAsset @relation(fields: [carbonAssetId], references: [id])
+
+  @@index([carbonAssetId])
+  @@index([overallRisk])
+  @@map("risk_assessments")
+}
+
+model ClimateRisk {
+  id                 String   @id @default(cuid())
+  carbonAssetId      String
+  hazardType         String?
+  exposureValue      Float?
+  annualExpectedLoss Float?
+  returnPeriod100Loss Float?
+  adaptationCost     Float?
+  createdAt          DateTime @default(now())
+
+  carbonAsset CarbonAsset @relation(fields: [carbonAssetId], references: [id])
+
+  @@index([carbonAssetId])
+  @@map("climate_risks")
+}
+
+// ============================================================================
+// LAYER 5: EQUITY BCDC PAYMENT RAILS
+// ============================================================================
+
+model EscrowAccount {
+  id          String       @id @default(cuid())
+  programmeId String
+  buyerOrgId  String
+  sellerOrgId String
+  amount      Float
+  currency    String       @default("USD")
+  status      EscrowStatus @default(CREATED)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  programme    Programme          @relation(fields: [programmeId], references: [id])
+  buyerOrg     Organisation       @relation("BuyerEscrows", fields: [buyerOrgId], references: [id])
+  sellerOrg    Organisation       @relation("SellerEscrows", fields: [sellerOrgId], references: [id])
+  transactions PaymentTransaction[]
+
+  @@index([programmeId])
+  @@index([buyerOrgId])
+  @@index([sellerOrgId])
+  @@index([status])
+  @@map("escrow_accounts")
+}
+
+model PaymentTransaction {
+  id              String        @id @default(cuid())
+  escrowAccountId String
+  type            PaymentType
+  amount          Float
+  currency        String        @default("USD")
+  fromAccount     String?
+  toAccount       String?
+  mobileMoneyRef  String?
+  status          PaymentStatus @default(PENDING)
+  processedAt     DateTime?
+  createdAt       DateTime      @default(now())
+
+  escrowAccount EscrowAccount @relation(fields: [escrowAccountId], references: [id])
+
+  @@index([escrowAccountId])
+  @@index([type])
+  @@index([status])
+  @@map("payment_transactions")
+}
+
+model BenefitShare {
+  id                   String             @id @default(cuid())
+  programmeId          String
+  communityName        String
+  province             String?
+  beneficiaryCount     Int?
+  totalAmount          Float
+  amountPerBeneficiary Float?
+  currency             String             @default("USD")
+  disbursementDate     DateTime?
+  paymentMethod        PaymentMethod
+  status               BenefitShareStatus @default(SCHEDULED)
+  verifiedById         String?
+  createdAt            DateTime           @default(now())
+
+  programme  Programme @relation(fields: [programmeId], references: [id])
+  verifiedBy User?     @relation("VerifiedBenefits", fields: [verifiedById], references: [id])
+
+  @@index([programmeId])
+  @@index([status])
+  @@index([province])
+  @@map("benefit_shares")
+}
+
+model KycRecord {
+  id               String              @id @default(cuid())
+  organisationId   String
+  verificationType KycVerificationType
+  status           KycStatus           @default(PENDING)
+  documentUrl      String?
+  verifiedById     String?
+  verifiedAt       DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime            @default(now())
+
+  organisation Organisation @relation(fields: [organisationId], references: [id])
+  verifiedBy   User?        @relation("VerifiedKyc", fields: [verifiedById], references: [id])
+
+  @@index([organisationId])
+  @@index([status])
+  @@map("kyc_records")
+}
+
+// ============================================================================
+// LAYER 6: INTEGRITY SCORING (AfCEN Custom)
+// ============================================================================
+
+model IntegrityAssessment {
+  id                    String         @id @default(cuid())
+  carbonAssetId         String
+  assessmentDate        DateTime
+  dataQualityScore      Float?
+  mrvConfidenceScore    Float?
+  additionalityScore    Float?
+  permanenceScore       Float?
+  leakageScore          Float?
+  safeguardsScore       Float?
+  communityBenefitScore Float?
+  overallScore          Float?
+  grade                 IntegrityGrade
+  methodology           String?
+  assessedById          String?
+  notes                 String?
+  createdAt             DateTime       @default(now())
+
+  carbonAsset CarbonAsset @relation(fields: [carbonAssetId], references: [id])
+  assessedBy  User?       @relation("AssessedIntegrity", fields: [assessedById], references: [id])
+
+  @@index([carbonAssetId])
+  @@index([grade])
+  @@index([assessedById])
+  @@map("integrity_assessments")
+}

@@ -1,26 +1,195 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────
+   DRC Carbon Registry — Design Tokens
+   Earthy greens + warm neutrals
+   ────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background surfaces */
+  --background: #f7f6f3;
+  --surface: #ffffff;
+  --surface-secondary: #f0efe9;
+
+  /* Text */
+  --foreground: #1a2e1a;
+  --foreground-muted: #5c6d5c;
+  --foreground-subtle: #8a9a8a;
+
+  /* Brand / accent */
+  --accent: #1b6b3a;
+  --accent-hover: #15542e;
+  --accent-light: #e5f2ea;
+  --accent-muted: #2d8a50;
+
+  /* Borders & dividers */
+  --border: #d4d1c7;
+  --border-light: #e8e6df;
+
+  /* Sidebar */
+  --sidebar-bg: #1a2e1a;
+  --sidebar-fg: #c8d8c8;
+  --sidebar-fg-muted: #7a9a7a;
+  --sidebar-active-bg: rgba(92, 184, 116, 0.15);
+  --sidebar-active-fg: #5cb874;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Cards */
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* Header */
+  --header-bg: rgba(247, 246, 243, 0.85);
+  --header-border: #d4d1c7;
 }
 
+/* ── Dark mode via media query ───────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #141e14;
+    --surface: #1c2b1c;
+    --surface-secondary: #1a261a;
+
+    --foreground: #e4ece4;
+    --foreground-muted: #a0b8a0;
+    --foreground-subtle: #6d8a6d;
+
+    --accent: #5cb874;
+    --accent-hover: #74cc8c;
+    --accent-light: rgba(92, 184, 116, 0.12);
+    --accent-muted: #3da85a;
+
+    --border: #2a3d2a;
+    --border-light: #223222;
+
+    --sidebar-bg: #111a11;
+    --sidebar-fg: #c8d8c8;
+    --sidebar-fg-muted: #6d8a6d;
+    --sidebar-active-bg: rgba(92, 184, 116, 0.18);
+    --sidebar-active-fg: #5cb874;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+    --sidebar-border: rgba(255, 255, 255, 0.06);
+
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+
+    --header-bg: rgba(20, 30, 20, 0.85);
+    --header-border: #2a3d2a;
+  }
+}
+
+/* ── Explicit theme overrides via data-theme attribute ── */
+:root[data-theme="light"] {
+  --background: #f7f6f3;
+  --surface: #ffffff;
+  --surface-secondary: #f0efe9;
+
+  --foreground: #1a2e1a;
+  --foreground-muted: #5c6d5c;
+  --foreground-subtle: #8a9a8a;
+
+  --accent: #1b6b3a;
+  --accent-hover: #15542e;
+  --accent-light: #e5f2ea;
+  --accent-muted: #2d8a50;
+
+  --border: #d4d1c7;
+  --border-light: #e8e6df;
+
+  --sidebar-bg: #1a2e1a;
+  --sidebar-fg: #c8d8c8;
+  --sidebar-fg-muted: #7a9a7a;
+  --sidebar-active-bg: rgba(92, 184, 116, 0.15);
+  --sidebar-active-fg: #5cb874;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  --header-bg: rgba(247, 246, 243, 0.85);
+  --header-border: #d4d1c7;
+}
+
+:root[data-theme="dark"] {
+  --background: #141e14;
+  --surface: #1c2b1c;
+  --surface-secondary: #1a261a;
+
+  --foreground: #e4ece4;
+  --foreground-muted: #a0b8a0;
+  --foreground-subtle: #6d8a6d;
+
+  --accent: #5cb874;
+  --accent-hover: #74cc8c;
+  --accent-light: rgba(92, 184, 116, 0.12);
+  --accent-muted: #3da85a;
+
+  --border: #2a3d2a;
+  --border-light: #223222;
+
+  --sidebar-bg: #111a11;
+  --sidebar-fg: #c8d8c8;
+  --sidebar-fg-muted: #6d8a6d;
+  --sidebar-active-bg: rgba(92, 184, 116, 0.18);
+  --sidebar-active-fg: #5cb874;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  --header-bg: rgba(20, 30, 20, 0.85);
+  --header-border: #2a3d2a;
+}
+
+/* ── Tailwind v4 inline theme ────────────────────────── */
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-muted: var(--accent-muted);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Base styles ─────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-subtle);
 }
