@@ -3,9 +3,7 @@
 import {
   Coins,
   FolderKanban,
-  AlertTriangle,
   TrendingUp,
-  Lock,
   ShieldCheck,
   ArrowUpRight,
   ArrowDownRight,
@@ -13,6 +11,12 @@ import {
   Plus,
   Bell,
   MapPin,
+  Layers,
+  Leaf,
+  Banknote,
+  Users2,
+  Wrench,
+  DollarSign,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -64,31 +68,22 @@ interface StatCard {
 
 const stats: StatCard[] = [
   {
-    label: 'Total Credits Issued',
-    value: '3,892,410',
-    change: '+12.4%',
+    label: 'Total Projects',
+    value: '34',
+    change: '+6 this quarter',
     trend: 'up',
-    icon: Coins,
-    iconColor: '#1b6b3a',
-    iconBg: '#e5f2ea',
-  },
-  {
-    label: 'Active Projects',
-    value: '12',
-    change: '+2 this quarter',
-    trend: 'up',
-    icon: FolderKanban,
+    icon: Layers,
     iconColor: '#2563eb',
     iconBg: '#dbeafe',
   },
   {
-    label: 'Deforestation Alerts',
-    value: '47',
-    change: '-8.2%',
-    trend: 'down',
-    icon: AlertTriangle,
-    iconColor: '#dc2626',
-    iconBg: '#fee2e2',
+    label: 'Active Carbon Projects',
+    value: '12',
+    change: '+2 this quarter',
+    trend: 'up',
+    icon: Leaf,
+    iconColor: '#1b6b3a',
+    iconBg: '#e5f2ea',
   },
   {
     label: 'NDC Progress',
@@ -100,13 +95,31 @@ const stats: StatCard[] = [
     iconBg: '#ede9fe',
   },
   {
-    label: 'Escrow Balance',
-    value: '$14.2M',
-    change: '+$1.8M',
+    label: 'Total Carbon Credits Issued',
+    value: '3,892,410',
+    change: '+12.4%',
     trend: 'up',
-    icon: Lock,
+    icon: Coins,
+    iconColor: '#059669',
+    iconBg: '#d1fae5',
+  },
+  {
+    label: 'Funders on Platform',
+    value: '18',
+    change: '+3 new',
+    trend: 'up',
+    icon: Banknote,
     iconColor: '#0891b2',
     iconBg: '#cffafe',
+  },
+  {
+    label: 'Developers on Platform',
+    value: '26',
+    change: '+5 new',
+    trend: 'up',
+    icon: Wrench,
+    iconColor: '#f59e0b',
+    iconBg: '#fef3c7',
   },
   {
     label: 'Integrity Score Avg',
@@ -114,8 +127,17 @@ const stats: StatCard[] = [
     change: 'Stable',
     trend: 'neutral',
     icon: ShieldCheck,
-    iconColor: '#059669',
-    iconBg: '#d1fae5',
+    iconColor: '#1b6b3a',
+    iconBg: '#e5f2ea',
+  },
+  {
+    label: 'Carbon Credit Price Range',
+    value: '$5.20–$18.40',
+    change: '+8.3%',
+    trend: 'up',
+    icon: DollarSign,
+    iconColor: '#dc2626',
+    iconBg: '#fee2e2',
   },
 ];
 
@@ -272,7 +294,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

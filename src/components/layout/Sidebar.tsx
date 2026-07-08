@@ -51,8 +51,6 @@ const navigation: NavSection[] = [
     items: [
       { label: 'Dashboard', href: '/', icon: LayoutDashboard },
       { label: 'Prospective Pipeline', href: '/pipeline', icon: TrendingUp },
-      { label: 'Admin', href: '/admin', icon: Settings },
-      { label: 'Matchmaking', href: '/matchmaking', icon: Sparkles },
     ],
   },
   {
@@ -89,6 +87,18 @@ const navigation: NavSection[] = [
       { label: 'Valuations', href: '/finance/valuations', icon: LineChart },
       { label: 'Risk Assessment', href: '/finance/risk', icon: ShieldAlert },
       { label: 'Climate Risk', href: '/finance/climate-risk', icon: ThermometerSun },
+    ],
+  },
+  {
+    title: 'ADMIN',
+    items: [
+      { label: 'Project Queries', href: '/admin', icon: Settings },
+    ],
+  },
+  {
+    title: 'Matchmaking',
+    items: [
+      { label: 'AI Matchmaking', href: '/matchmaking', icon: Sparkles },
     ],
   },
   {
@@ -188,17 +198,9 @@ export default function Sidebar() {
         className="flex items-center gap-3 px-5 py-3"
         style={{ borderBottom: '1px solid var(--sidebar-border)' }}
       >
-        <div className="flex items-center gap-1.5 shrink-0">
-          <img src="/drc-flag.svg" alt="DRC Flag" className="h-7 w-9 rounded shadow-sm object-cover" />
-          <img src="/equity-bcdc.png" alt="Equity BCDC" className="h-7 brightness-200 opacity-90" />
-        </div>
-        <div>
-          <div className="text-sm font-semibold" style={{ color: 'var(--sidebar-fg)' }}>
-            DRC Carbon Registry
-          </div>
-          <div className="text-xs" style={{ color: 'var(--sidebar-fg-muted)' }}>
-            AfCEN × Equity BCDC
-          </div>
+        <img src="/drc-flag.svg" alt="DRC Flag" className="h-7 w-9 rounded shadow-sm object-cover shrink-0" />
+        <div className="text-sm font-semibold" style={{ color: 'var(--sidebar-fg)' }}>
+          DRC Carbon Registry
         </div>
       </div>
 
@@ -221,13 +223,6 @@ export default function Sidebar() {
           color: 'var(--sidebar-fg-muted)',
         }}
       >
-        <div className="flex flex-col items-center gap-2 mb-2">
-          <img src="/equity-bcdc.png" alt="Equity BCDC" className="h-7 opacity-80 brightness-200" />
-          <div className="flex items-center gap-2">
-            <img src="/afcen-logo.svg" alt="AfCEN" className="h-5 brightness-200 opacity-90" />
-          </div>
-          <div className="text-xs opacity-60">Powered by AfCEN</div>
-        </div>
         <div className="flex items-center justify-between text-xs">
           <span>v1.0.0</span>
           <span>DRC-MoE</span>
