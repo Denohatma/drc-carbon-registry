@@ -35,6 +35,7 @@ import dynamic from 'next/dynamic';
 import { cn, formatNumber, formatCurrency } from '@/lib/utils';
 
 const DRCMap = dynamic(() => import('@/components/ui/drc-map').then(m => ({ default: m.DRCMap })), { ssr: false });
+const DashboardChatbot = dynamic(() => import('@/components/ui/dashboard-chatbot'), { ssr: false });
 
 const dashboardMarkers = [
   { lat: -2.1, lng: 18.2, label: 'Mai-Ndombe REDD+', popup: '742,500 ha · Tropical Moist Broadleaf', color: 'green' as const },
@@ -572,6 +573,8 @@ export default function DashboardPage() {
           <DRCMap markers={dashboardMarkers} height={320} />
         </div>
       </div>
+
+      <DashboardChatbot />
     </div>
   );
 }

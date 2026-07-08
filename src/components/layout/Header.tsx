@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 const segmentLabels: Record<string, string> = {
   '': 'Dashboard',
   pipeline: 'Prospective Pipeline',
+  admin: 'Admin — Project Queries',
+  matchmaking: 'AI Matchmaking',
   registry: 'Registry',
   projects: 'Projects',
   credits: 'Credits',
@@ -145,11 +147,11 @@ export default function Header() {
         {/* User menu */}
         <button className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-surface-secondary transition-colors duration-150">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white text-xs font-bold">
-            JM
+            DN
           </div>
           <div className="hidden sm:block text-left">
             <div className="text-sm font-medium text-foreground">
-              Jean Mukendi
+              Dennis Nderitu
             </div>
             <div className="text-xs text-foreground-muted">
               Registry Admin

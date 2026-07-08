@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Filter, ChevronDown, ExternalLink, X, MapPin, DollarSign, Users, Calendar, FileText } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, Filter, ChevronDown, ExternalLink, X, MapPin, DollarSign, Users, Calendar, FileText, MessageCircle, Send, ArrowLeft } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { getQueries, saveQuery, generateId, type ProjectQuery } from '@/lib/queries';
 
 interface PipelineProject {
   id: string;
@@ -614,6 +615,60 @@ export default function PipelinePage() {
   const [sectorFilter, setSectorFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selected, setSelected] = useState<PipelineProject | null>(null);
+  const [dialogView, setDialogView] = useState<'details' | 'chat'>('details');
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'system'; text: string; time: string }[]>([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  function openProject(p: PipelineProject) {
+    setSelected(p);
+    setDialogView('details');
+    setChatMessages([]);
+    setChatInput('');
+  }
+
+  function closeDialog() {
+    setSelected(null);
+    setDialogView('details');
+    setChatMessages([]);
+    setChatInput('');
+  }
+
+  function sendMessage() {
+    if (!chatInput.trim() || !selected) return;
+    const now = new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const userMsg = { role: 'user' as const, text: chatInput.trim(), time: now };
+    setChatMessages((prev) => [...prev, userMsg]);
+
+    saveQuery({
+      id: generateId(),
+      projectId: selected.id,
+      projectName: selected.name,
+      userName: 'Jean Mukendi',
+      userEmail: 'j.mukendi@drc-registry.cd',
+      question: chatInput.trim(),
+      response: null,
+      status: 'Open',
+      createdAt: new Date().toISOString(),
+      respondedAt: null,
+      respondedBy: null,
+    });
+
+    setChatInput('');
+
+    setTimeout(() => {
+      const sysMsg = {
+        role: 'system' as const,
+        text: `Thank you for your query about ${selected.name}. Your question has been logged and the AfCEN investment team will respond within 48 hours. Query reference has been saved to the Admin dashboard.`,
+        time: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      };
+      setChatMessages((prev) => [...prev, sysMsg]);
+    }, 800);
+  }
 
   const sectors = ['All', ...new Set(projects.map((p) => p.sector))];
   const statuses = ['All', ...new Set(projects.map((p) => p.status))];
@@ -735,7 +790,7 @@ export default function PipelinePage() {
                   <td className="px-5 py-3 font-mono font-medium text-[var(--foreground)] tabular-nums">{formatUSD(p.investmentNeed)}</td>
                   <td className="px-5 py-3">
                     <button
-                      onClick={() => setSelected(p)}
+                      onClick={() => openProject(p)}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
                     >
                       Details
@@ -756,113 +811,199 @@ export default function PipelinePage() {
 
       {/* Detail Dialog */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={closeDialog}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-[var(--surface)] border border-[var(--border-light)] shadow-2xl"
+            className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl bg-[var(--surface)] border border-[var(--border-light)] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Dialog header */}
-            <div className="sticky top-0 bg-[var(--surface)] border-b border-[var(--border)] px-6 py-4 flex items-start justify-between z-10">
-              <div>
-                <p className="text-xs font-mono text-[var(--foreground-subtle)]">{selected.id}</p>
-                <h2 className="text-lg font-bold text-[var(--foreground)] mt-1">{selected.name}</h2>
-                <div className="flex items-center gap-2 mt-2">
-                  <StatusBadge status={selected.status} />
-                  <span className="text-xs text-[var(--foreground-muted)]">{selected.sector}</span>
+            <div className="bg-[var(--surface)] border-b border-[var(--border)] px-6 py-4 flex items-start justify-between rounded-t-2xl shrink-0">
+              <div className="flex items-start gap-3">
+                {dialogView === 'chat' && (
+                  <button
+                    onClick={() => setDialogView('details')}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--foreground-muted)] transition-colors mt-1"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                )}
+                <div>
+                  <p className="text-xs font-mono text-[var(--foreground-subtle)]">{selected.id}</p>
+                  <h2 className="text-lg font-bold text-[var(--foreground)] mt-1">{selected.name}</h2>
+                  <div className="flex items-center gap-2 mt-2">
+                    <StatusBadge status={selected.status} />
+                    <span className="text-xs text-[var(--foreground-muted)]">{selected.sector}</span>
+                  </div>
                 </div>
               </div>
               <button
-                onClick={() => setSelected(null)}
+                onClick={closeDialog}
                 className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--foreground-muted)] transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Dialog body */}
-            <div className="px-6 py-5 space-y-5">
-              {/* Description */}
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] mb-2">Project Description</h3>
-                <p className="text-sm text-[var(--foreground)] leading-relaxed">{selected.description}</p>
-              </div>
+            {dialogView === 'details' ? (
+              <>
+                {/* Dialog body — details view */}
+                <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] mb-2">Project Description</h3>
+                    <p className="text-sm text-[var(--foreground)] leading-relaxed">{selected.description}</p>
+                  </div>
 
-              {/* Key metrics grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <DollarSign className="h-4 w-4 text-[var(--accent)]" />
-                    <span className="text-xs font-medium text-[var(--foreground-muted)]">Investment Need</span>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <DollarSign className="h-4 w-4 text-[var(--accent)]" />
+                        <span className="text-xs font-medium text-[var(--foreground-muted)]">Investment Need</span>
+                      </div>
+                      <p className="text-xl font-bold text-[var(--foreground)]">{formatUSD(selected.investmentNeed)}</p>
+                    </div>
+                    <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="h-4 w-4 text-[var(--accent)]" />
+                        <span className="text-xs font-medium text-[var(--foreground-muted)]">Est. Credits</span>
+                      </div>
+                      <p className="text-xl font-bold text-[var(--foreground)]">{(selected.estimatedCredits / 1_000_000).toFixed(1)}M tCO2e</p>
+                    </div>
+                    <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Calendar className="h-4 w-4 text-[var(--accent)]" />
+                        <span className="text-xs font-medium text-[var(--foreground-muted)]">Timeline</span>
+                      </div>
+                      <p className="text-sm font-semibold text-[var(--foreground)]">{selected.startDate}</p>
+                      <p className="text-xs text-[var(--foreground-subtle)]">{selected.duration}</p>
+                    </div>
+                    <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="h-4 w-4 text-[var(--accent)]" />
+                        <span className="text-xs font-medium text-[var(--foreground-muted)]">Location</span>
+                      </div>
+                      <p className="text-sm font-semibold text-[var(--foreground)]">{selected.province}</p>
+                      <p className="text-xs text-[var(--foreground-subtle)]">{selected.coordinates}</p>
+                    </div>
                   </div>
-                  <p className="text-xl font-bold text-[var(--foreground)]">{formatUSD(selected.investmentNeed)}</p>
-                </div>
-                <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <FileText className="h-4 w-4 text-[var(--accent)]" />
-                    <span className="text-xs font-medium text-[var(--foreground-muted)]">Est. Credits</span>
-                  </div>
-                  <p className="text-xl font-bold text-[var(--foreground)]">{(selected.estimatedCredits / 1_000_000).toFixed(1)}M tCO2e</p>
-                </div>
-                <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-[var(--accent)]" />
-                    <span className="text-xs font-medium text-[var(--foreground-muted)]">Timeline</span>
-                  </div>
-                  <p className="text-sm font-semibold text-[var(--foreground)]">{selected.startDate}</p>
-                  <p className="text-xs text-[var(--foreground-subtle)]">{selected.duration}</p>
-                </div>
-                <div className="bg-[var(--surface-secondary)] rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <MapPin className="h-4 w-4 text-[var(--accent)]" />
-                    <span className="text-xs font-medium text-[var(--foreground-muted)]">Location</span>
-                  </div>
-                  <p className="text-sm font-semibold text-[var(--foreground)]">{selected.province}</p>
-                  <p className="text-xs text-[var(--foreground-subtle)]">{selected.coordinates}</p>
-                </div>
-              </div>
 
-              {/* Details list */}
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <span className="text-xs font-semibold text-[var(--foreground-muted)] w-28 shrink-0 pt-0.5">Methodology</span>
-                  <span className="text-sm text-[var(--foreground)]">{selected.methodology}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-xs font-semibold text-[var(--foreground-muted)] w-28 shrink-0 pt-0.5">Sponsor</span>
-                  <span className="text-sm text-[var(--foreground)]">{selected.sponsor}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-xs font-semibold text-[var(--foreground-muted)] w-28 shrink-0 pt-0.5">Contact</span>
-                  <span className="text-sm text-[var(--foreground)]">{selected.contact}</span>
-                </div>
-              </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <span className="text-xs font-semibold text-[var(--foreground-muted)] w-28 shrink-0 pt-0.5">Methodology</span>
+                      <span className="text-sm text-[var(--foreground)]">{selected.methodology}</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-xs font-semibold text-[var(--foreground-muted)] w-28 shrink-0 pt-0.5">Sponsor</span>
+                      <span className="text-sm text-[var(--foreground)]">{selected.sponsor}</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-xs font-semibold text-[var(--foreground-muted)] w-28 shrink-0 pt-0.5">Contact</span>
+                      <span className="text-sm text-[var(--foreground)]">{selected.contact}</span>
+                    </div>
+                  </div>
 
-              {/* Co-benefits */}
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] mb-2">Co-benefits</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selected.cobenefits.map((cb) => (
-                    <span key={cb} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--accent-light)] text-[var(--accent)]">
-                      {cb}
-                    </span>
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)] mb-2">Co-benefits</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selected.cobenefits.map((cb) => (
+                        <span key={cb} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--accent-light)] text-[var(--accent)]">
+                          {cb}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dialog footer — details view */}
+                <div className="bg-[var(--surface)] border-t border-[var(--border)] px-6 py-4 flex items-center justify-between rounded-b-2xl shrink-0">
+                  <button
+                    onClick={() => setDialogView('chat')}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-light)] transition-colors"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Query Project
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={closeDialog}
+                      className="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button className="px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors">
+                      Request Investment Brief
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Chat view */}
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
+                  {/* Welcome message */}
+                  <div className="flex gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white text-xs font-bold">AC</div>
+                    <div className="max-w-[80%]">
+                      <div className="rounded-2xl rounded-tl-md bg-[var(--surface-secondary)] px-4 py-3">
+                        <p className="text-sm text-[var(--foreground)]">
+                          Welcome to the AfCEN project query channel for <strong>{selected.name}</strong>. Ask any questions about this project — investment terms, methodology, timelines, sponsor details, or co-benefit verification. Our team will respond within 48 hours.
+                        </p>
+                      </div>
+                      <p className="text-xs text-[var(--foreground-subtle)] mt-1 ml-1">AfCEN Support</p>
+                    </div>
+                  </div>
+
+                  {chatMessages.map((msg, i) => (
+                    <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-[var(--accent)] text-white'
+                      }`}>
+                        {msg.role === 'user' ? 'JM' : 'AC'}
+                      </div>
+                      <div className={`max-w-[80%] ${msg.role === 'user' ? 'items-end' : ''}`}>
+                        <div className={`rounded-2xl px-4 py-3 ${
+                          msg.role === 'user'
+                            ? 'rounded-tr-md bg-blue-600 text-white'
+                            : 'rounded-tl-md bg-[var(--surface-secondary)]'
+                        }`}>
+                          <p className={`text-sm ${msg.role === 'user' ? 'text-white' : 'text-[var(--foreground)]'}`}>{msg.text}</p>
+                        </div>
+                        <p className={`text-xs text-[var(--foreground-subtle)] mt-1 ${msg.role === 'user' ? 'text-right mr-1' : 'ml-1'}`}>
+                          {msg.role === 'user' ? 'You' : 'AfCEN Support'} · {msg.time}
+                        </p>
+                      </div>
+                    </div>
                   ))}
+                  <div ref={chatEndRef} />
                 </div>
-              </div>
-            </div>
 
-            {/* Dialog footer */}
-            <div className="sticky bottom-0 bg-[var(--surface)] border-t border-[var(--border)] px-6 py-4 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setSelected(null)}
-                className="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] hover:bg-[var(--surface-secondary)] transition-colors"
-              >
-                Close
-              </button>
-              <button className="px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors">
-                Request Investment Brief
-              </button>
-            </div>
+                {/* Chat input */}
+                <div className="bg-[var(--surface)] border-t border-[var(--border)] px-6 py-4 rounded-b-2xl shrink-0">
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1 relative">
+                      <textarea
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                        placeholder="Ask about this project..."
+                        rows={2}
+                        className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                      />
+                    </div>
+                    <button
+                      onClick={sendMessage}
+                      disabled={!chatInput.trim()}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-[var(--foreground-subtle)] mt-2">
+                    Queries are logged and visible to AfCEN administrators. Press Enter to send.
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
