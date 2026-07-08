@@ -23,6 +23,11 @@ const presets: Record<string, string> = {
   refund: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
   community_payout: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
   developer_disbursement: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+  feasibility: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400',
+  'due diligence': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  negotiation: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  concept: 'bg-gray-100 text-gray-800 dark:bg-gray-700/30 dark:text-gray-400',
+  validation: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
 };
 
 const fallback = 'bg-gray-100 text-gray-800 dark:bg-gray-700/30 dark:text-gray-400';

@@ -389,13 +389,13 @@ export default function ProgressPage() {
                 width={80}
               />
               <Tooltip
-                formatter={(value: number, name: string) => [
-                  `${value.toFixed(2)} MtCO2e`,
+                formatter={(value, name) => [
+                  `${Number(value).toFixed(2)} MtCO2e`,
                   name === 'target' ? 'Target Reduction' : 'Achieved Reduction',
                 ]}
               />
               <Legend
-                formatter={(value: string) =>
+                formatter={(value) =>
                   value === 'target' ? 'Target Reduction' : 'Achieved Reduction'
                 }
               />

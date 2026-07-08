@@ -295,7 +295,7 @@ export default function CarbonStocksPage() {
                     tick={{ fontSize: 11, fill: '#9ca3af' }}
                     axisLine={{ stroke: '#e5e7eb' }}
                     tickLine={false}
-                    tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                   />
                   <YAxis
                     dataKey="project"
@@ -306,7 +306,7 @@ export default function CarbonStocksPage() {
                     width={120}
                   />
                   <Tooltip
-                    formatter={(value: number) => `${value.toLocaleString()} tCO2e`}
+                    formatter={(value) => `${Number(value).toLocaleString()} tCO2e`}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
@@ -357,10 +357,10 @@ export default function CarbonStocksPage() {
                     tick={{ fontSize: 11, fill: '#9ca3af' }}
                     axisLine={{ stroke: '#e5e7eb' }}
                     tickLine={false}
-                    tickFormatter={(v: number) => `${(v / 1000000).toFixed(2)}M`}
+                    tickFormatter={(v) => `${(v / 1000000).toFixed(2)}M`}
                   />
                   <Tooltip
-                    formatter={(value: number) => `${value.toLocaleString()} tCO2e`}
+                    formatter={(value) => `${Number(value).toLocaleString()} tCO2e`}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',

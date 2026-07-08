@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import {
   AlertTriangle,
   AlertCircle,
@@ -12,6 +13,8 @@ import {
   Clock,
   ChevronDown,
 } from 'lucide-react';
+
+const DRCMap = dynamic(() => import('@/components/ui/drc-map').then(m => ({ default: m.DRCMap })), { ssr: false });
 import {
   AreaChart,
   Area,
@@ -380,6 +383,28 @@ export default function DeforestationAlertsPage() {
               Showing {filtered.length} of {alerts.length} alerts
             </div>
           </div>
+        </div>
+
+        {/* Alert Locations Map */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-red-600" />
+              <h2 className="text-base font-semibold text-gray-900">Alert Locations</h2>
+            </div>
+            <span className="text-xs text-gray-400">{filtered.length} alerts mapped</span>
+          </div>
+          <DRCMap
+            satellite
+            height={400}
+            markers={filtered.map((a) => ({
+              lat: a.latitude,
+              lng: a.longitude,
+              label: a.id,
+              popup: `${a.location}<br/>${a.areaHa} ha · ${a.confidence} confidence<br/>${a.source} · ${a.date}`,
+              color: a.severity === 'critical' ? 'red' as const : a.severity === 'warning' ? 'amber' as const : 'green' as const,
+            }))}
+          />
         </div>
 
         {/* Alerts Table */}

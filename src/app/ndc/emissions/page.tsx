@@ -207,15 +207,15 @@ export default function EmissionsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => [
-                    `${value.toFixed(1)} MtCO2e`,
+                  formatter={(value) => [
+                    `${Number(value).toFixed(1)} MtCO2e`,
                     'Emissions',
                   ]}
                 />
                 <Legend
                   verticalAlign="bottom"
                   height={36}
-                  formatter={(value: string) => (
+                  formatter={(value) => (
                     <span className="text-sm text-gray-700">{value}</span>
                   )}
                 />
@@ -237,8 +237,8 @@ export default function EmissionsPage() {
                 <XAxis dataKey="gas" tick={{ fontSize: 13 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value: number) => [
-                    `${value.toFixed(1)} MtCO2e`,
+                  formatter={(value) => [
+                    `${Number(value).toFixed(1)} MtCO2e`,
                     'Emissions',
                   ]}
                 />

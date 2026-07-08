@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 /** Map route segments to readable labels */
 const segmentLabels: Record<string, string> = {
   '': 'Dashboard',
+  pipeline: 'Prospective Pipeline',
   registry: 'Registry',
   projects: 'Projects',
   credits: 'Credits',

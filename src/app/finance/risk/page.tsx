@@ -344,7 +344,7 @@ export default function RiskAssessmentPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Share"]}
+                    formatter={(value) => [`${value}%`, "Share"]}
                     contentStyle={{
                       borderRadius: "8px",
                       border: "1px solid #e5e7eb",

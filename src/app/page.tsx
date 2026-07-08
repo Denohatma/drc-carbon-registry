@@ -31,7 +31,23 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import dynamic from 'next/dynamic';
 import { cn, formatNumber, formatCurrency } from '@/lib/utils';
+
+const DRCMap = dynamic(() => import('@/components/ui/drc-map').then(m => ({ default: m.DRCMap })), { ssr: false });
+
+const dashboardMarkers = [
+  { lat: -2.1, lng: 18.2, label: 'Mai-Ndombe REDD+', popup: '742,500 ha · Tropical Moist Broadleaf', color: 'green' as const },
+  { lat: 0.05, lng: 20.4, label: 'Equateur Forest Reserve', popup: '518,300 ha · Swamp Forest', color: 'green' as const },
+  { lat: 1.45, lng: 25.3, label: 'Tshopo Community Forest', popup: '385,000 ha · Dense Humid Forest', color: 'green' as const },
+  { lat: -2.3, lng: 28.8, label: 'Kahuzi-Biega Buffer Zone', popup: '296,400 ha · Montane Forest', color: 'amber' as const },
+  { lat: -1.9, lng: 17.9, label: 'Lac Tumba Wetlands', popup: '210,800 ha · Flooded Forest', color: 'green' as const },
+  { lat: -1.0, lng: 21.5, label: 'Salonga North Corridor', popup: '178,200 ha · Primary Rainforest', color: 'green' as const },
+  { lat: 1.4, lng: 28.5, label: 'Okapi Wildlife Periphery', popup: '162,400 ha · Dense Humid Forest', color: 'blue' as const },
+  { lat: -3.4, lng: 28.7, label: 'Itombwe Massif Conservation', popup: '143,200 ha · Montane & Bamboo Forest', color: 'green' as const },
+  { lat: -2.2, lng: 16.5, label: 'Bolobo Agroforestry', popup: '98,500 ha · Secondary Forest', color: 'green' as const },
+  { lat: 2.1, lng: 21.8, label: 'Mongala River Basin', popup: '112,230 ha · Riparian Forest', color: 'blue' as const },
+];
 
 /* ── Stat Cards Data ──────────────────────────────────── */
 
@@ -330,7 +346,7 @@ export default function DashboardPage() {
                   tick={{ fontSize: 11, fill: 'var(--foreground-subtle)' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
@@ -374,7 +390,7 @@ export default function DashboardPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [`${value}%`, 'Share']}
+                    formatter={(value) => [`${value}%`, 'Share']}
                     contentStyle={{
                       backgroundColor: 'var(--surface)',
                       border: '1px solid var(--border)',
@@ -436,7 +452,7 @@ export default function DashboardPage() {
                   tick={{ fontSize: 11, fill: 'var(--foreground-subtle)' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v: number) => `${(v / 1000).toFixed(1)}k`}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(1)}k`}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Line
@@ -542,7 +558,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Map Placeholder */}
+        {/* Project Locations Map */}
         <div
           className="lg:col-span-3 rounded-xl border border-border-light bg-surface p-5"
           style={{ boxShadow: 'var(--card-shadow)' }}
@@ -553,20 +569,7 @@ export default function DashboardPage() {
           <p className="mb-4 text-xs text-foreground-muted">
             Geographic distribution of registered carbon projects
           </p>
-          <div
-            className="flex h-80 items-center justify-center rounded-lg border border-dashed border-border"
-            style={{ backgroundColor: 'var(--surface-secondary)' }}
-          >
-            <div className="text-center">
-              <MapPin className="mx-auto h-10 w-10 text-foreground-subtle" />
-              <p className="mt-2 text-sm font-medium text-foreground-muted">
-                Interactive Map
-              </p>
-              <p className="mt-1 text-xs text-foreground-subtle">
-                Mapbox GL integration pending
-              </p>
-            </div>
-          </div>
+          <DRCMap markers={dashboardMarkers} height={320} />
         </div>
       </div>
     </div>

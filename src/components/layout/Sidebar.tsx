@@ -49,6 +49,7 @@ const navigation: NavSection[] = [
     title: 'Overview',
     items: [
       { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+      { label: 'Prospective Pipeline', href: '/pipeline', icon: TrendingUp },
     ],
   },
   {
@@ -181,18 +182,16 @@ export default function Sidebar() {
     >
       {/* Brand */}
       <div
-        className="flex h-16 items-center gap-3 px-5"
+        className="flex items-center gap-3 px-5 py-3"
         style={{ borderBottom: '1px solid var(--sidebar-border)' }}
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent)] text-white text-sm font-bold">
-          CR
-        </div>
+        <img src="/drc-flag.svg" alt="DRC Flag" className="h-8 w-10 rounded shadow-sm object-cover" />
         <div>
           <div className="text-sm font-semibold" style={{ color: 'var(--sidebar-fg)' }}>
             DRC Carbon Registry
           </div>
           <div className="text-xs" style={{ color: 'var(--sidebar-fg-muted)' }}>
-            AfCEN Platform
+            AfCEN × Equity BCDC
           </div>
         </div>
       </div>
@@ -210,13 +209,16 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div
-        className="px-4 py-3 text-xs"
+        className="px-4 py-3"
         style={{
           borderTop: '1px solid var(--sidebar-border)',
           color: 'var(--sidebar-fg-muted)',
         }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center mb-2">
+          <img src="/equity-bcdc.png" alt="Equity BCDC" className="h-7 opacity-80 brightness-200" />
+        </div>
+        <div className="flex items-center justify-between text-xs">
           <span>v1.0.0</span>
           <span>DRC-MoE</span>
         </div>

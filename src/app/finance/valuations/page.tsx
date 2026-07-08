@@ -365,11 +365,11 @@ export default function ValuationsPage() {
                   tick={{ fontSize: 12, fill: "#6b7280" }}
                   tickLine={false}
                   axisLine={{ stroke: "#d1d5db" }}
-                  tickFormatter={(v: number) => `$${v.toFixed(2)}`}
+                  tickFormatter={(v) => `$${v.toFixed(2)}`}
                 />
                 <Tooltip
-                  formatter={(value: number) => [
-                    `$${value.toFixed(2)}`,
+                  formatter={(value) => [
+                    `$${Number(value).toFixed(2)}`,
                     "Price/Credit",
                   ]}
                   contentStyle={{

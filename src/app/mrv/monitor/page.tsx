@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { StatusBadge } from '@/components/ui/status-badge';
 import {
   Satellite,
@@ -12,6 +13,8 @@ import {
   ChevronDown,
   Search,
 } from 'lucide-react';
+
+const DRCMap = dynamic(() => import('@/components/ui/drc-map').then(m => ({ default: m.DRCMap })), { ssr: false });
 
 const summaryCards = [
   {
@@ -147,6 +150,18 @@ const monitoringProjects = [
   },
 ];
 
+const projectCoords: Record<string, [number, number]> = {
+  'MN-001': [-2.1, 18.2],
+  'EQ-002': [0.05, 20.4],
+  'TS-003': [1.45, 25.3],
+  'SK-004': [-2.3, 28.8],
+  'MN-005': [-1.9, 17.9],
+  'EQ-006': [-1.0, 21.5],
+  'TS-007': [1.4, 28.5],
+  'SK-008': [-3.4, 28.7],
+  'MN-009': [-2.2, 16.5],
+  'EQ-010': [2.1, 21.8],
+};
 
 export default function SatelliteMonitoringDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,65 +223,28 @@ export default function SatelliteMonitoringDashboard() {
           })}
         </div>
 
-        {/* Map Placeholder */}
+        {/* Satellite Map */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-emerald-600" />
               <h2 className="text-base font-semibold text-gray-900">
-                Satellite View &mdash; Mai-Ndombe Province
+                Satellite View &mdash; DRC Monitoring Zones
               </h2>
             </div>
-            <span className="text-xs text-gray-400">Sentinel-2 | 10m resolution | 2026-07-05</span>
+            <span className="text-xs text-gray-400">Esri Satellite Imagery | 2026-07-05</span>
           </div>
-          <div
-            className="relative flex items-center justify-center bg-gradient-to-br from-emerald-900 via-green-800 to-emerald-950"
-            style={{ height: 600 }}
-          >
-            {/* Simulated terrain grid */}
-            <div className="absolute inset-0 opacity-10">
-              <svg width="100%" height="100%">
-                <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-              </svg>
-            </div>
-
-            {/* Map pins for projects */}
-            <div className="absolute top-[15%] left-[30%] flex items-center gap-1">
-              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-xs text-emerald-300 font-medium">Mai-Ndombe REDD+</span>
-            </div>
-            <div className="absolute top-[25%] left-[55%] flex items-center gap-1">
-              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-xs text-emerald-300 font-medium">Equateur Reserve</span>
-            </div>
-            <div className="absolute top-[40%] left-[70%] flex items-center gap-1">
-              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-xs text-emerald-300 font-medium">Tshopo Community</span>
-            </div>
-            <div className="absolute top-[65%] left-[75%] flex items-center gap-1">
-              <div className="w-3 h-3 bg-amber-400 rounded-full animate-pulse" />
-              <span className="text-xs text-amber-300 font-medium">Kahuzi-Biega</span>
-            </div>
-            <div className="absolute top-[35%] left-[25%] flex items-center gap-1">
-              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-xs text-emerald-300 font-medium">Lac Tumba</span>
-            </div>
-
-            <div className="text-center z-10">
-              <Satellite className="h-16 w-16 text-white/20 mx-auto mb-4" />
-              <p className="text-white/60 text-lg font-medium">
-                Interactive Satellite Map
-              </p>
-              <p className="text-white/40 text-sm mt-1">
-                Mapbox GL integration &mdash; 10 monitoring zones across 4 provinces
-              </p>
-            </div>
-          </div>
+          <DRCMap
+            satellite
+            height={550}
+            markers={monitoringProjects.map((p) => ({
+              lat: projectCoords[p.id]?.[0] ?? -2.5,
+              lng: projectCoords[p.id]?.[1] ?? 23.5,
+              label: p.name,
+              popup: `${p.area.toLocaleString()} ha · ${p.forestType}<br/>Status: ${p.status} · Last: ${p.lastObservation}`,
+              color: p.status === 'Active' ? 'green' as const : p.status === 'Under Review' ? 'amber' as const : 'blue' as const,
+            }))}
+          />
         </div>
 
         {/* Monitoring Projects Table */}

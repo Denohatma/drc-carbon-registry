@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 /* ──────────────────────────────────────────────────────────
    DRC Carbon Registry — Design Tokens
@@ -26,13 +27,13 @@
   --border: #d4d1c7;
   --border-light: #e8e6df;
 
-  /* Sidebar */
-  --sidebar-bg: #1a2e1a;
-  --sidebar-fg: #c8d8c8;
-  --sidebar-fg-muted: #7a9a7a;
-  --sidebar-active-bg: rgba(92, 184, 116, 0.15);
-  --sidebar-active-fg: #5cb874;
-  --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+  /* Sidebar — grey & black */
+  --sidebar-bg: #111111;
+  --sidebar-fg: #e0e0e0;
+  --sidebar-fg-muted: #888888;
+  --sidebar-active-bg: rgba(255, 255, 255, 0.08);
+  --sidebar-active-fg: #ffffff;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
   --sidebar-border: rgba(255, 255, 255, 0.08);
 
   /* Status */
@@ -68,12 +69,12 @@
     --border: #2a3d2a;
     --border-light: #223222;
 
-    --sidebar-bg: #111a11;
-    --sidebar-fg: #c8d8c8;
-    --sidebar-fg-muted: #6d8a6d;
-    --sidebar-active-bg: rgba(92, 184, 116, 0.18);
-    --sidebar-active-fg: #5cb874;
-    --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+    --sidebar-bg: #0a0a0a;
+    --sidebar-fg: #d4d4d4;
+    --sidebar-fg-muted: #737373;
+    --sidebar-active-bg: rgba(255, 255, 255, 0.1);
+    --sidebar-active-fg: #ffffff;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
     --sidebar-border: rgba(255, 255, 255, 0.06);
 
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
