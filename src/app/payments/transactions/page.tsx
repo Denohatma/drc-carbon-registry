@@ -43,14 +43,6 @@ const monthlyVolume = [
   { month: 'Jun', deposits: 490000, payouts: 82000, disbursements: 195000 },
 ];
 
-const typeColors: Record<string, string> = {
-  DEPOSIT: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  RELEASE: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  REFUND: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  COMMUNITY_PAYOUT: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  DEVELOPER_DISBURSEMENT: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-};
-
 
 export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState('All');
@@ -112,7 +104,7 @@ export default function TransactionsPage() {
               {filtered.map((tx) => (
                 <tr key={tx.id} className="border-b border-[var(--border)] hover:bg-[var(--stripe)]">
                   <td className="px-4 py-3 font-mono text-xs text-[var(--accent)]">{tx.id}</td>
-                  <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[tx.type]}`}>{tx.type.replace(/_/g, ' ')}</span></td>
+                  <td className="px-4 py-3"><StatusBadge status={tx.type} /></td>
                   <td className="px-4 py-3 font-medium text-[var(--text)] tabular-nums">{tx.currency === 'USD' ? formatCurrency(tx.amount) : `${tx.amount.toLocaleString()} CDF`}</td>
                   <td className="px-4 py-3 text-[var(--text)]">{tx.from}</td>
                   <td className="px-4 py-3 text-[var(--text)]">{tx.to}</td>

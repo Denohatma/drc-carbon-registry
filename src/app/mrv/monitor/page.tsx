@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { StatusBadge } from '@/components/ui/status-badge';
 import {
   Satellite,
   TreePine,
@@ -146,11 +147,6 @@ const monitoringProjects = [
   },
 ];
 
-const statusColors: Record<string, string> = {
-  Active: 'bg-emerald-100 text-emerald-800',
-  'Under Review': 'bg-amber-100 text-amber-800',
-  'Pending Baseline': 'bg-sky-100 text-sky-800',
-};
 
 export default function SatelliteMonitoringDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -338,11 +334,7 @@ export default function SatelliteMonitoringDashboard() {
                     <td className="px-5 py-3 text-center text-gray-600">{project.baselineYear}</td>
                     <td className="px-5 py-3 text-gray-600">{project.lastObservation}</td>
                     <td className="px-5 py-3 text-center">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[project.status] || 'bg-gray-100 text-gray-800'}`}
-                      >
-                        {project.status}
-                      </span>
+                      <StatusBadge status={project.status} />
                     </td>
                   </tr>
                 ))}
