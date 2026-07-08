@@ -78,17 +78,18 @@ export function DRCMap({
     markers.forEach((m) => {
       const color = markerColors[m.color || 'green'];
       const marker = L.marker([m.lat, m.lng], { icon: createIcon(color) }).addTo(map);
-      if (m.popup) {
-        marker.bindPopup(
-          `<div style="font-family:system-ui;font-size:13px">
+      const tooltipContent = m.popup
+        ? `<div style="font-family:system-ui;font-size:13px;line-height:1.4">
             <strong>${m.label}</strong><br/>
             <span style="color:#555">${m.popup}</span>
-          </div>`,
-          { maxWidth: 250 }
-        );
-      } else {
-        marker.bindPopup(`<strong style="font-family:system-ui;font-size:13px">${m.label}</strong>`);
-      }
+          </div>`
+        : `<strong style="font-family:system-ui;font-size:13px">${m.label}</strong>`;
+      marker.bindTooltip(tooltipContent, {
+        direction: 'top',
+        offset: [0, -10],
+        opacity: 0.95,
+        className: 'drc-map-tooltip',
+      });
     });
 
     if (markers.length > 1) {
