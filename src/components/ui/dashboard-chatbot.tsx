@@ -160,7 +160,7 @@ export default function DashboardChatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-lg hover:bg-accent/90 transition-all duration-200 hover:scale-105"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-accent text-white shadow-lg hover:bg-accent/90 transition-all duration-200 hover:scale-105"
           aria-label="Open assistant"
         >
           <MessageCircle className="h-6 w-6" />
@@ -169,7 +169,7 @@ export default function DashboardChatbot() {
 
       {/* Chat panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex w-96 max-h-[520px] flex-col rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden">
+        <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-50 flex w-[calc(100vw-1.5rem)] sm:w-96 max-h-[80vh] sm:max-h-[520px] flex-col rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between bg-accent px-4 py-3 text-white">
             <div className="flex items-center gap-2">

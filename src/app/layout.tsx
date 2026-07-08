@@ -18,9 +18,9 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className="h-full bg-background text-foreground font-sans">
         <Sidebar />
-        <div className="pl-64 flex h-full flex-col">
+        <div className="lg:pl-64 flex h-full flex-col">
           <Header />
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-3 sm:p-6">
             {children}
           </main>
         </div>

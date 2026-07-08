@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -31,6 +31,8 @@ import {
   ChevronDown,
   ChevronRight,
   Sparkles,
+  Menu,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -123,9 +125,11 @@ const navigation: NavSection[] = [
 function NavSectionGroup({
   section,
   pathname,
+  onNavigate,
 }: {
   section: NavSection;
   pathname: string;
+  onNavigate?: () => void;
 }) {
   const hasActiveItem = section.items.some(
     (item) => pathname === item.href || pathname.startsWith(item.href + '/')
@@ -163,6 +167,7 @@ function NavSectionGroup({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onNavigate}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
                   'transition-all duration-150',
@@ -182,17 +187,9 @@ function NavSectionGroup({
   );
 }
 
-export default function Sidebar() {
-  const pathname = usePathname();
-
+function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
-    <aside
-      className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r"
-      style={{
-        backgroundColor: 'var(--sidebar-bg)',
-        borderColor: 'var(--sidebar-border)',
-      }}
-    >
+    <>
       {/* Brand */}
       <div
         className="flex items-center gap-3 px-5 py-3"
@@ -211,6 +208,7 @@ export default function Sidebar() {
             key={section.title}
             section={section}
             pathname={pathname}
+            onNavigate={onNavigate}
           />
         ))}
       </nav>
@@ -228,6 +226,71 @@ export default function Sidebar() {
           <span>DRC-MoE</span>
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function MobileMenuButton() {
+  return (
+    <button
+      onClick={() => window.dispatchEvent(new CustomEvent('toggle-sidebar'))}
+      className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-muted hover:bg-surface-secondary hover:text-foreground transition-colors lg:hidden"
+      aria-label="Open menu"
+    >
+      <Menu className="h-5 w-5" />
+    </button>
+  );
+}
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setMobileOpen((prev) => !prev);
+    window.addEventListener('toggle-sidebar', handler);
+    return () => window.removeEventListener('toggle-sidebar', handler);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside
+        className="fixed inset-y-0 left-0 z-30 hidden lg:flex w-64 flex-col border-r"
+        style={{
+          backgroundColor: 'var(--sidebar-bg)',
+          borderColor: 'var(--sidebar-border)',
+        }}
+      >
+        <SidebarContent pathname={pathname} />
+      </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setMobileOpen(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <aside
+            className="absolute inset-y-0 left-0 flex w-72 flex-col"
+            style={{ backgroundColor: 'var(--sidebar-bg)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="absolute right-3 top-3 z-10">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+                style={{ color: 'var(--sidebar-fg-muted)' }}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

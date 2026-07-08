@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Bell, Moon, Sun, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MobileMenuButton } from './Sidebar';
 
-/** Map route segments to readable labels */
 const segmentLabels: Record<string, string> = {
   '': 'Dashboard',
   pipeline: 'Prospective Pipeline',
@@ -82,7 +82,6 @@ function ThemeToggle() {
 export default function Header() {
   const pathname = usePathname();
 
-  // Build breadcrumb from pathname
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs =
     segments.length === 0
@@ -92,40 +91,40 @@ export default function Header() {
           href: '/' + segments.slice(0, i + 1).join('/'),
         }));
 
-  const pageTitle = breadcrumbs[breadcrumbs.length - 1]?.label ?? 'Dashboard';
-
   return (
     <header
-      className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-6 backdrop-blur-sm"
+      className="sticky top-0 z-20 flex h-14 sm:h-16 items-center justify-between border-b px-3 sm:px-6 backdrop-blur-sm"
       style={{
         backgroundColor: 'var(--header-bg)',
         borderColor: 'var(--header-border)',
       }}
     >
-      {/* Left: Breadcrumbs */}
-      <div className="flex items-center gap-1.5">
-        {breadcrumbs.map((crumb, i) => (
-          <div key={crumb.href} className="flex items-center gap-1.5">
-            {i > 0 && (
-              <ChevronRight className="h-3.5 w-3.5 text-foreground-subtle" />
-            )}
-            <span
-              className={cn(
-                'text-sm',
-                i === breadcrumbs.length - 1
-                  ? 'font-semibold text-foreground'
-                  : 'text-foreground-muted'
+      {/* Left: Mobile menu + Breadcrumbs */}
+      <div className="flex items-center gap-2 min-w-0">
+        <MobileMenuButton />
+        <div className="flex items-center gap-1.5 min-w-0">
+          {breadcrumbs.map((crumb, i) => (
+            <div key={crumb.href} className="flex items-center gap-1.5 min-w-0">
+              {i > 0 && (
+                <ChevronRight className="h-3.5 w-3.5 text-foreground-subtle shrink-0 hidden sm:block" />
               )}
-            >
-              {crumb.label}
-            </span>
-          </div>
-        ))}
+              <span
+                className={cn(
+                  'text-sm truncate',
+                  i === breadcrumbs.length - 1
+                    ? 'font-semibold text-foreground'
+                    : 'text-foreground-muted hidden sm:inline'
+                )}
+              >
+                {crumb.label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2">
-        {/* Notifications */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <button
           className={cn(
             'relative flex h-9 w-9 items-center justify-center rounded-lg',
@@ -138,18 +137,15 @@ export default function Header() {
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-danger" />
         </button>
 
-        {/* Theme toggle */}
         <ThemeToggle />
 
-        {/* Divider */}
-        <div className="mx-1 h-6 w-px bg-border" />
+        <div className="mx-1 h-6 w-px bg-border hidden sm:block" />
 
-        {/* User menu */}
-        <button className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-surface-secondary transition-colors duration-150">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white text-xs font-bold">
+        <button className="flex items-center gap-2 sm:gap-3 rounded-lg px-1.5 sm:px-2 py-1.5 hover:bg-surface-secondary transition-colors duration-150">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white text-xs font-bold shrink-0">
             DN
           </div>
-          <div className="hidden sm:block text-left">
+          <div className="hidden md:block text-left">
             <div className="text-sm font-medium text-foreground">
               Dennis Nderitu
             </div>
@@ -157,7 +153,7 @@ export default function Header() {
               Registry Admin
             </div>
           </div>
-          <span className="hidden sm:inline-flex items-center rounded-full bg-accent-light px-2 py-0.5 text-xs font-medium text-accent">
+          <span className="hidden lg:inline-flex items-center rounded-full bg-accent-light px-2 py-0.5 text-xs font-medium text-accent">
             Admin
           </span>
         </button>
